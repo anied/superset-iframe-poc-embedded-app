@@ -18,7 +18,7 @@
  */
 /* eslint-env browser */
 import cx from 'classnames';
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback, useMemo, useEffect } from 'react';
 import { JsonObject, styled, css, t } from '@superset-ui/core';
 import { Global } from '@emotion/react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -343,6 +343,20 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
     ],
   );
 
+  const handleMessage = useCallback(event => {
+    console.log('iframe received event from parent:', event);
+  }, []);
+
+  const sendMessage = () => {
+    console.log('sending message to parent frame...');
+    window.parent.postMessage('Greetings from the nested iframe', '*');
+  };
+
+  useEffect(() => {
+    window.addEventListener('message', handleMessage, false);
+    return () => window.removeEventListener('message', handleMessage, false);
+  }, [handleMessage]);
+
   return (
     <StyledDiv>
       {nativeFiltersEnabled && !editMode && (
@@ -361,6 +375,9 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
           </StickyPanel>
         </FiltersPanel>
       )}
+      <button type="button" onClick={sendMessage}>
+        Sent message to parent
+      </button>
       <StyledHeader>
         {/* @ts-ignore */}
         <DragDroppable
