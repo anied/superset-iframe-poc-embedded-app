@@ -411,7 +411,7 @@ DEFAULT_FEATURE_FLAGS: Dict[str, bool] = {
     # a custom security config could potentially give access to setting filters on
     # tables that users do not have access to.
     "ROW_LEVEL_SECURITY": True,
-    "EMBEDDED_SUPERSET": False,
+    "EMBEDDED_SUPERSET": True,
     # Enables Alerts and reports new implementation
     "ALERT_REPORTS": False,
     # Enable experimental feature to search for other dashboards
