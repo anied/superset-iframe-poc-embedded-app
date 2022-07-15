@@ -376,7 +376,7 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
         </FiltersPanel>
       )}
       <button type="button" onClick={sendMessage}>
-        Sent message to parent
+        Send message to parent
       </button>
       <StyledHeader>
         {/* @ts-ignore */}
