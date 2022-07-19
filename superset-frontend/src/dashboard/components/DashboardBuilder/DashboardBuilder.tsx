@@ -33,7 +33,7 @@ import WithPopoverMenu from 'src/dashboard/components/menu/WithPopoverMenu';
 import getDirectPathToTabIndex from 'src/dashboard/util/getDirectPathToTabIndex';
 import { URL_PARAMS } from 'src/constants';
 import { getUrlParam } from 'src/utils/urlUtils';
-import { DashboardLayout, RootState } from 'src/dashboard/types';
+import { DashboardInfo, DashboardLayout, RootState } from 'src/dashboard/types';
 import { setDirectPathToChild } from 'src/dashboard/actions/dashboardState';
 import { useElementOnScreen } from 'src/hooks/useElementOnScreen';
 import { FeatureFlag, isFeatureEnabled } from 'src/featureFlags';
@@ -61,7 +61,11 @@ import {
   OPEN_FILTER_BAR_WIDTH,
   TABS_HEIGHT,
 } from 'src/dashboard/constants';
-import { shouldFocusTabs, getRootLevelTabsComponent } from './utils';
+import {
+  shouldFocusTabs,
+  getRootLevelTabsComponent,
+  generateUrl,
+} from './utils';
 import DashboardContainer from './DashboardContainer';
 import { useNativeFilters } from './state';
 
@@ -211,6 +215,9 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
   const dispatch = useDispatch();
   const uiConfig = useUiConfig();
 
+  const dashboardId = useSelector<RootState, DashboardInfo['id']>(
+    state => state.dashboardInfo.id,
+  );
   const dashboardLayout = useSelector<RootState, DashboardLayout>(
     state => state.dashboardLayout.present,
   );
@@ -343,9 +350,24 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
     ],
   );
 
-  const handleMessage = useCallback(event => {
-    console.log('iframe received event from parent:', event);
-  }, []);
+  const handleMessage = useCallback(
+    ({ data: { type, message, transactionId } }) => {
+      if (!type || type === 'message') {
+        console.log('iframe received event from parent:', message);
+      } else if (type === 'urlRequest') {
+        const chartId = message;
+        generateUrl(dashboardId, chartId).then(url => {
+          const payload = {
+            message: url,
+            transactionId,
+            type,
+          };
+          window.parent.postMessage(payload, '*');
+        });
+      }
+    },
+    [dashboardId],
+  );
 
   const sendMessage = () => {
     console.log('sending message to parent frame...');

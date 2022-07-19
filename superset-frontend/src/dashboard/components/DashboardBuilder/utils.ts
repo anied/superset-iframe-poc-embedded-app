@@ -22,6 +22,9 @@ import {
 } from 'src/dashboard/util/constants';
 import { DashboardLayout } from 'src/dashboard/types';
 import findTabIndexByComponentId from 'src/dashboard/util/findTabIndexByComponentId';
+import { getDashboardPermalink, getUrlParam } from 'src/utils/urlUtils';
+import { URL_PARAMS } from 'src/constants';
+import { getFilterValue } from 'src/dashboard/components/nativeFilters/FilterBar/keyValue';
 
 export const getRootLevelTabsComponent = (dashboardLayout: DashboardLayout) => {
   const dashboardRoot = dashboardLayout[DASHBOARD_ROOT_ID];
@@ -50,3 +53,19 @@ export const getRootLevelTabIndex = (
       directPathToChild,
     }),
   );
+
+export async function generateUrl(
+  dashboardId: string | number,
+  dashboardComponentId: string | undefined,
+) {
+  const nativeFiltersKey = getUrlParam(URL_PARAMS.nativeFiltersKey);
+  let filterState = {};
+  if (nativeFiltersKey && dashboardId) {
+    filterState = await getFilterValue(dashboardId, nativeFiltersKey);
+  }
+  return getDashboardPermalink({
+    dashboardId,
+    filterState,
+    hash: dashboardComponentId,
+  });
+}
