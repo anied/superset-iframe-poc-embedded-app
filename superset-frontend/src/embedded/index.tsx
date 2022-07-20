@@ -163,6 +163,8 @@ window.addEventListener('message', function embeddedPageInitializer(event) {
       height: document.body.scrollHeight,
     }));
 
+    switchboard.defineMethod('getHello', () => ({ message: 'hello' }));
+
     switchboard.start();
   }
 });

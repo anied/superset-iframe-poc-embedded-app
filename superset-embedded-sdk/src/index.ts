@@ -58,6 +58,7 @@ export type Size = {
 export type EmbeddedDashboard = {
   getScrollSize: () => Promise<Size>
   unmount: () => void
+  getHello: () => Promise<{ message: string}>
 }
 
 /**
@@ -137,7 +138,7 @@ export async function embedDashboard({
     });
   }
 
-  const [guestToken, ourPort] = await Promise.all([
+  const [guestToken, ourPort]: [string, Switchboard] = await Promise.all([
     fetchGuestToken(),
     mountIframe(),
   ]);
@@ -159,9 +160,11 @@ export async function embedDashboard({
   }
 
   const getScrollSize = () => ourPort.get<Size>('getScrollSize');
+  const getHello = () => ourPort.get<{ message: string }>('getHello');
 
   return {
     getScrollSize,
     unmount,
+    getHello,
   };
 }
