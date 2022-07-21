@@ -29,6 +29,7 @@ import ErrorBoundary from 'src/components/ErrorBoundary';
 import Loading from 'src/components/Loading';
 import { addDangerToast } from 'src/components/MessageToasts/actions';
 import ToastContainer from 'src/components/MessageToasts/ToastContainer';
+import { generateUrl } from 'src/dashboard/components/DashboardBuilder/utils';
 
 const debugMode = process.env.WEBPACK_MODE === 'development';
 
@@ -163,7 +164,16 @@ window.addEventListener('message', function embeddedPageInitializer(event) {
       height: document.body.scrollHeight,
     }));
 
-    switchboard.defineMethod('getHello', () => ({ message: 'hello' }));
+    switchboard.defineMethod(
+      'getUrlByChartId',
+      async ({ chartId: dashboardComponentId }) => {
+        const dashboardId =
+          store?.getState()?.dashboardInfo?.id ||
+          bootstrapData.embedded!.dashboard_id;
+        const url = await generateUrl(dashboardId, dashboardComponentId);
+        return url;
+      },
+    );
 
     switchboard.start();
   }

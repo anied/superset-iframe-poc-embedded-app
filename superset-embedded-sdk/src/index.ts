@@ -58,14 +58,14 @@ export type Size = {
 export type EmbeddedDashboard = {
   getScrollSize: () => Promise<Size>
   unmount: () => void
-  getHello: () => Promise<{ message: string}>
+  getUrlByChartId: (chartId: string | undefined) => Promise<string>
 }
 
 /**
  * Embeds a Superset dashboard into the page using an iframe.
  */
 export async function embedDashboard({
-  id,
+  id: dashboardId,
   supersetDomain,
   mountPoint,
   fetchGuestToken,
@@ -74,7 +74,7 @@ export async function embedDashboard({
 }: EmbedDashboardParams): Promise<EmbeddedDashboard> {
   function log(...info: unknown[]) {
     if (debug) {
-      console.debug(`[superset-embedded-sdk][dashboard ${id}]`, ...info);
+      console.debug(`[superset-embedded-sdk][dashboard ${dashboardId}]`, ...info);
     }
   }
 
@@ -132,7 +132,7 @@ export async function embedDashboard({
         resolve(new Switchboard({ port: ourPort, name: 'superset-embedded-sdk', debug }));
       });
 
-      iframe.src = `${supersetDomain}/embedded/${id}${dashboardConfig}`;
+      iframe.src = `${supersetDomain}/embedded/${dashboardId}${dashboardConfig}`;
       mountPoint.replaceChildren(iframe);
       log('placed the iframe')
     });
@@ -160,11 +160,11 @@ export async function embedDashboard({
   }
 
   const getScrollSize = () => ourPort.get<Size>('getScrollSize');
-  const getHello = () => ourPort.get<{ message: string }>('getHello');
+  const getUrlByChartId = (chartId: string | undefined) => ourPort.get<string>('getUrlByChartId', { chartId });
 
   return {
     getScrollSize,
     unmount,
-    getHello,
+    getUrlByChartId,
   };
 }
